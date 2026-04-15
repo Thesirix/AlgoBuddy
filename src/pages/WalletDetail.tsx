@@ -54,28 +54,6 @@ export default function WalletDetail() {
   if (!walletAddress) { navigate("/"); return null; }
   if (!wallet) { navigate("/dashboard"); return null; }
 
-  const netBalances = useMemo(() => {
-    const balances: Record<string, number> = {};
-    wallet.members.forEach((m) => (balances[m.address] = 0));
-    wallet.expenses.forEach((e) => {
-      const share = e.amount / e.splitBetween.length;
-      e.splitBetween.forEach((addr) => {
-        if (addr === e.paidBy) {
-          balances[addr] = (balances[addr] || 0) + (e.amount - share);
-        } else {
-          balances[addr] = (balances[addr] || 0) - share;
-        }
-      });
-    });
-    return balances;
-  }, [wallet]);
-
-  const fairnessScore = useMemo(() => {
-    const vals = Object.values(netBalances);
-    if (vals.length === 0) return 100;
-    const maxImbalance = Math.max(...vals.map(Math.abs));
-    return Math.max(0, Math.round(100 - maxImbalance * 0.5));
-  }, [netBalances]);
 
   const handleDeposit = async () => {
     setDepositLoading(true);
